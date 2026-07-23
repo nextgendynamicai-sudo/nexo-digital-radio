@@ -1,28 +1,27 @@
 /**
- * NEXO DIGITAL - AUDIO PLAYER & WEB AUDIO ENGINE
- * Dual-Mode Engine: Real Radio Live Stream + Web Audio Rock Synthesizer Fallback
+ * NEXO DIGITAL - AUDIO PLAYER & LIVE STREAM ENGINE
+ * Direct Stream Engine for Zeno Media Radio Stream (Station: rZAF2b / 7d4wxyy8g0hvv)
  */
 
 class NexoAudioEngine {
   constructor() {
-    this.primaryStreamUrl = "https://content-api.zeno.fm/s/rZAF2b";
-    this.fallbackStreamUrl = "https://stream.zeno.fm/f3wvbb1ndg8uv";
-    this.streamUrl = this.primaryStreamUrl;
+    // Exact audio stream URL for Zeno Media Station rZAF2b
+    this.primaryStreamUrl = localStorage.getItem('nexo_custom_stream_url') || "https://stream.zeno.fm/7d4wxyy8g0hvv";
+    this.zenoPortalUrl = "https://content-api.zeno.fm/s/rZAF2b";
+    
     this.audioElement = null;
     this.audioCtx = null;
     this.analyser = null;
-    this.sourceNode = null;
     this.isPlaying = false;
     this.isSynthMode = false;
     this.volume = 0.8;
-    this.synthOscillators = [];
     this.synthInterval = null;
 
     // Track state
     this.currentTrack = {
       title: "Señal Matriz Nexo Digital Live",
-      artist: "Zeno Stream: https://content-api.zeno.fm/s/rZAF2b",
-      album: "Transmisión en Vivo 320 kbps",
+      artist: "Transmisión en Vivo Zeno Media (rZAF2b)",
+      album: "Rock & Podcast HQ 320 kbps",
       bitrate: "320 kbps",
       cover: "logo.png"
     };
@@ -35,10 +34,14 @@ class NexoAudioEngine {
     if (!this.audioElement) return;
 
     this.audioElement.volume = this.volume;
+    this.audioElement.src = this.primaryStreamUrl;
     
-    // Event Listeners for HTML Audio
+    // HTML5 Audio Event Listeners
     this.audioElement.addEventListener('playing', () => {
       this.isPlaying = true;
+      this.isSynthMode = false;
+      this.currentTrack.title = "Señal Matriz Nexo Digital Live";
+      this.currentTrack.artist = "Transmisión en Vivo (content-api.zeno.fm/s/rZAF2b)";
       this.notifyStateChange();
     });
 
@@ -49,11 +52,17 @@ class NexoAudioEngine {
       }
     });
 
+    this.audioElement.addEventListener('waiting', () => {
+      console.log("Cargando señal matriz de Zeno Media...");
+    });
+
     this.audioElement.addEventListener('error', (e) => {
-      console.warn("Retrying primary Zeno live stream...", e);
-      if (this.audioElement && !this.isSynthMode) {
-        this.audioElement.src = this.primaryStreamUrl;
-        this.audioElement.play().catch(() => {});
+      console.warn("Reintentando conexión con la señal matriz...", e);
+      if (this.isPlaying && !this.isSynthMode) {
+        setTimeout(() => {
+          this.audioElement.src = this.primaryStreamUrl;
+          this.audioElement.play().catch(err => console.log("Stream retry info:", err));
+        }, 1500);
       }
     });
   }
@@ -72,7 +81,29 @@ class NexoAudioEngine {
     }
   }
 
+  setCustomStreamUrl(url) {
+    if (!url || url.trim() === '') return;
+    let target = url.trim();
+
+    // Auto-resolve Zeno portal link to direct MP3 stream endpoint if needed
+    if (target.includes('content-api.zeno.fm') || target.includes('zeno.fm/s/rZAF2b')) {
+      target = "https://stream.zeno.fm/7d4wxyy8g0hvv";
+    }
+
+    this.primaryStreamUrl = target;
+    localStorage.setItem('nexo_custom_stream_url', target);
+
+    if (this.audioElement) {
+      const wasPlaying = this.isPlaying;
+      this.pause();
+      this.audioElement.src = target;
+      if (wasPlaying) this.play();
+    }
+  }
+
   async togglePlay() {
+    this.setupAudioContext();
+
     if (this.isPlaying) {
       this.pause();
     } else {
@@ -84,24 +115,20 @@ class NexoAudioEngine {
     this.setupAudioContext();
 
     if (this.isSynthMode) {
-      this.startSynthRockEngine();
-      this.isPlaying = true;
-      this.notifyStateChange();
-      return;
+      this.stopSynthRockEngine();
+      this.isSynthMode = false;
+    }
+
+    if (!this.audioElement.src || this.audioElement.src === '' || this.audioElement.src.includes('content-api.zeno.fm')) {
+      this.audioElement.src = this.primaryStreamUrl;
     }
 
     try {
-      if (!this.audioElement.src || !this.audioElement.src.includes('zeno.fm')) {
-        this.audioElement.src = this.primaryStreamUrl;
-      }
       await this.audioElement.play();
       this.isPlaying = true;
-      this.currentTrack.title = "Señal Matriz Nexo Digital Live";
-      this.currentTrack.artist = "Zeno Direct Stream: content-api.zeno.fm/s/rZAF2b";
       this.notifyStateChange();
     } catch (err) {
-      console.warn("Direct stream playback error:", err);
-      this.startSynthRockEngine();
+      console.warn("Error reproduciendo stream directo:", err);
     }
   }
 
@@ -121,9 +148,6 @@ class NexoAudioEngine {
     if (this.audioElement) {
       this.audioElement.volume = this.volume;
     }
-    if (this.synthGain) {
-      this.synthGain.gain.setValueAtTime(this.volume * 0.3, this.audioCtx.currentTime);
-    }
   }
 
   switchToSynthMode() {
@@ -135,11 +159,11 @@ class NexoAudioEngine {
   switchToLiveStream() {
     this.stopSynthRockEngine();
     this.isSynthMode = false;
-    this.audioElement.src = this.streamUrl;
+    this.audioElement.src = this.primaryStreamUrl;
     this.play();
   }
 
-  // Web Audio Rock Synth Generator - Ensures audio + visualizer ALWAYS works live!
+  // Web Audio Synth Generator (Only activated when user explicitly clicks Synth mode button)
   startSynthRockEngine() {
     this.setupAudioContext();
     this.isSynthMode = true;
@@ -152,8 +176,7 @@ class NexoAudioEngine {
       this.analyser.connect(this.audioCtx.destination);
     }
 
-    // Heavy Futuristic Cyber-Rock Chord Scale (E Minor Rock riff)
-    const frequencies = [82.41, 123.47, 164.81, 246.94, 329.63, 493.88]; // E2, B2, E3, B3, E4, B4
+    const frequencies = [82.41, 123.47, 164.81, 246.94, 329.63, 493.88];
     let step = 0;
 
     if (this.synthInterval) clearInterval(this.synthInterval);
@@ -162,12 +185,9 @@ class NexoAudioEngine {
       if (!this.isPlaying || !this.isSynthMode) return;
 
       const now = this.audioCtx.currentTime;
-      
-      // Synth Lead / Guitar Distortion Simulator
       const osc = this.audioCtx.createOscillator();
       const noteGain = this.audioCtx.createGain();
 
-      // Rock sawtooth waveform
       osc.type = (step % 4 === 0) ? 'sawtooth' : 'square';
       const freq = frequencies[step % frequencies.length] * ((step % 8 > 4) ? 1.5 : 1.0);
       osc.frequency.setValueAtTime(freq, now);
@@ -181,7 +201,6 @@ class NexoAudioEngine {
       osc.start(now);
       osc.stop(now + 0.36);
 
-      // Cyber Kick / Bass drum beat
       if (step % 2 === 0) {
         const kickOsc = this.audioCtx.createOscillator();
         const kickGain = this.audioCtx.createGain();
@@ -200,7 +219,7 @@ class NexoAudioEngine {
       }
 
       step++;
-    }, 220); // 136 BPM Cyber Rock Pulse
+    }, 220);
 
     this.currentTrack.title = "Sintetizador Rock Futurista [Modo Malla]";
     this.currentTrack.artist = "Nexo Synth-Engine AI";

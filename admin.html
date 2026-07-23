@@ -109,6 +109,11 @@
           </div>
 
           <div>
+            <label class="text-xs font-semibold text-purple-400 block mb-1">URL de Transmisión Directa Zeno / Radio</label>
+            <input type="text" id="main-stream-url-input" value="https://content-api.zeno.fm/s/rZAF2b" class="w-full bg-slate-900 border border-purple-500/40 rounded-xl p-3 text-xs font-mono text-slate-100 focus:outline-none focus:border-purple-500">
+          </div>
+
+          <div>
             <label class="text-xs font-semibold text-slate-400 block mb-1">YouTube Live RTMP Stream Key</label>
             <input type="password" id="yt-key-input" value="live_yt_key_93847291" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-purple-500">
           </div>
@@ -221,15 +226,20 @@
     });
 
     function saveRtmpConfig() {
+      const streamUrl = document.getElementById('main-stream-url-input').value;
       const yt = document.getElementById('yt-key-input').value;
       const tk = document.getElementById('tk-key-input').value;
       const tw = document.getElementById('tw-key-input').value;
+
+      if (streamUrl && window.nexoAudio) {
+        window.nexoAudio.setCustomStreamUrl(streamUrl);
+      }
 
       localStorage.setItem('nexo_yt_key', yt);
       localStorage.setItem('nexo_tk_key', tk);
       localStorage.setItem('nexo_tw_key', tw);
 
-      showToast("🔑 Llaves RTMP sincronizadas con YouTube Live & TikTok Studio");
+      showToast("📡 URL de Transmisión Zeno & Llaves RTMP Sincronizadas");
     }
 
     function launchCommercialSpot() {
