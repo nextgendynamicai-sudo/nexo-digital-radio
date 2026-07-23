@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexo Digital - Radio Rock & Composición de Masas</title>
+  <meta name="description" content="Plataforma de Radio Rock Minimalista, Podcasting Futurista y Composición de Masas en Vivo. Sincronización multicanal YouTube & TikTok.">
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#A855F7">
+
+  <!-- Tailwind CSS & Custom Design System -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="min-h-screen flex flex-col justify-between p-3 md:p-6 text-slate-100">
+
+  <!-- TOP HEADER & BRANDING NAVIGATION -->
+  <header class="max-w-6xl mx-auto w-full py-4 border-b border-slate-800/80 flex flex-col md:flex-row justify-between items-center gap-4">
+    <div class="flex items-center gap-3">
+      <!-- NEXO DIGITAL OFFICIAL LOGO -->
+      <div class="relative group cursor-pointer" onclick="switchTab('live')">
+        <img src="logo.png" alt="Nexo Digital Logo" class="w-14 h-14 rounded-2xl object-cover bg-slate-950 border border-purple-500/50 brand-glow transition transform group-hover:scale-105 shadow-xl">
+        <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></span>
+      </div>
+
+      <div>
+        <h1 class="text-xl md:text-2xl font-black tracking-wider text-gradient-purple">NEXO DIGITAL</h1>
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] text-purple-400 font-mono tracking-widest uppercase font-bold">Radio Rock Futurista</span>
+          <span class="text-[9px] px-1.5 py-0.5 bg-purple-950/80 text-purple-300 border border-purple-800/50 rounded font-mono">v2.5</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN NAVIGATION TABS -->
+    <nav class="flex items-center gap-1 md:gap-2 bg-slate-950/80 p-1.5 rounded-xl border border-slate-800 text-xs overflow-x-auto max-w-full">
+      <button onclick="switchTab('live')" data-target="live" class="nav-tab active px-3 py-2 rounded-lg font-bold transition flex items-center gap-1.5">
+        📻 <span>Señal Matriz</span>
+      </button>
+      <button onclick="switchTab('mass')" data-target="mass" class="nav-tab px-3 py-2 rounded-lg font-bold transition flex items-center gap-1.5">
+        ⚡ <span>Composición Masas</span>
+      </button>
+      <button onclick="switchTab('schedule')" data-target="schedule" class="nav-tab px-3 py-2 rounded-lg font-bold transition flex items-center gap-1.5">
+        📅 <span>Programación</span>
+      </button>
+      <button onclick="switchTab('podcasts')" data-target="podcasts" class="nav-tab px-3 py-2 rounded-lg font-bold transition flex items-center gap-1.5">
+        🎙️ <span>Podcasts</span>
+      </button>
+      <button id="tab-admin" onclick="switchTab('admin')" data-target="admin" class="nav-tab hidden px-3 py-2 rounded-lg font-bold transition flex items-center gap-1.5 text-purple-400 border border-purple-900/50">
+        🎛️ <span>Master Panel</span>
+      </button>
+    </nav>
+
+    <!-- AUTH BUTTON -->
+    <button onclick="toggleAuthModal()" id="auth-btn" class="px-4 py-2 text-xs font-bold bg-purple-600 hover:bg-purple-500 text-white rounded-xl shadow-lg transition brand-glow flex items-center gap-2">
+      Ingresar
+    </button>
+  </header>
+
+  <!-- APP CONTENT SECTIONS -->
+  <main class="max-w-6xl mx-auto w-full my-6 flex-grow">
+
+    <!-- SECTION 1: SEÑAL MATRIZ & LIVE AUDIO PLAYER -->
+    <section id="section-live" class="app-section space-y-6">
+      <div class="glass-panel rounded-2xl p-6 md:p-8 border border-slate-800 brand-glow relative overflow-hidden">
+        <!-- Floating Crowd Particles FX Overlay -->
+        <div id="particle-container" class="particle-fx-container"></div>
+
+        <!-- Live Signal Header Status -->
+        <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-red-500/20 text-red-400 border border-red-500/40 text-xs font-bold rounded-full animate-pulse">
+              <span class="w-2 h-2 rounded-full bg-red-500"></span> EN VIVO MULTICANAL
+            </span>
+            <a href="https://content-api.zeno.fm/s/rZAF2b" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-950/80 hover:bg-purple-900/90 text-purple-300 border border-purple-500/40 text-xs font-bold font-mono rounded-full transition brand-glow">
+              🌐 Portal Radio Directo: content-api.zeno.fm/s/rZAF2b
+            </a>
+          </div>
+
+          <div class="flex items-center gap-3 text-xs text-slate-400 font-mono">
+            <span>👥 <strong id="listeners-count" class="text-purple-400">14.280</strong> oyentes</span>
+            <span class="px-2 py-0.5 bg-slate-950 border border-slate-800 rounded text-slate-300">HQ 320 kbps</span>
+          </div>
+        </div>
+
+        <!-- TRACK HUD DISPLAY -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center mb-6 bg-slate-950/70 p-5 rounded-xl border border-slate-800/80">
+          <div class="flex items-center gap-4 md:col-span-2">
+            <div class="relative w-16 h-16 rounded-xl overflow-hidden border border-purple-500/40 shrink-0">
+              <img id="track-cover" src="logo.png" alt="Now Playing" class="w-full h-full object-cover">
+              <div class="absolute inset-0 bg-purple-950/30"></div>
+            </div>
+            <div>
+              <p class="text-[10px] text-purple-400 font-bold uppercase tracking-widest">En Transmisión Ahora</p>
+              <h2 id="track-title" class="text-lg md:text-xl font-bold text-white line-clamp-1">Señal Matriz Nexo Digital</h2>
+              <p id="track-artist" class="text-xs text-slate-400 font-mono">Zeno Media Direct Stream • Rock Minimalista Futurista</p>
+            </div>
+          </div>
+
+          <!-- PLAYER ACTION BUTTONS -->
+          <div class="flex flex-col sm:flex-row items-center justify-end gap-3">
+            <button id="main-play-btn" onclick="window.nexoAudio.togglePlay()" class="w-full sm:w-auto px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm rounded-xl shadow-lg transition brand-glow flex items-center justify-center gap-2">
+              ▶ TRANSMITIR
+            </button>
+            <a href="https://content-api.zeno.fm/s/rZAF2b" target="_blank" rel="noopener noreferrer" title="Abrir portal de radio digital directo" class="px-3 py-3 bg-slate-900 hover:bg-slate-800 text-purple-400 border border-purple-500/30 rounded-xl text-xs font-mono font-bold transition flex items-center gap-1">
+              🔗 Abrir Portal
+            </a>
+            <button onclick="window.nexoAudio.switchToSynthMode()" title="Activar generador Web Audio Synthesizer" class="px-3 py-3 bg-slate-900 hover:bg-slate-800 text-purple-400 border border-purple-500/30 rounded-xl text-xs font-mono font-bold transition">
+              🎛️ Synth
+            </button>
+          </div>
+        </div>
+
+        <!-- AUDIO VISUALIZER CANVAS -->
+        <div class="mb-6">
+          <div class="flex justify-between items-center mb-2 px-1 text-xs text-slate-400 font-mono">
+            <span>Espectro de Frecuencia Máster</span>
+            <span class="text-purple-400">Stream: content-api.zeno.fm/s/rZAF2b</span>
+          </div>
+          <canvas id="visualizer-canvas"></canvas>
+        </div>
+
+        <!-- HIDDEN AUDIO ELEMENT & VOLUME CONTROL -->
+        <div class="flex flex-wrap justify-between items-center gap-4 bg-slate-950/60 p-4 rounded-xl border border-slate-800/80">
+          <audio id="radio-stream" crossorigin="anonymous">
+            <source src="https://content-api.zeno.fm/s/rZAF2b" type="audio/mpeg">
+            <source src="https://stream.zeno.fm/f3wvbb1ndg8uv" type="audio/mpeg">
+          </audio>
+
+          <div class="flex items-center gap-3 w-full sm:w-auto">
+            <span class="text-xs font-bold text-slate-400">🔊 Volumen</span>
+            <input type="range" min="0" max="1" step="0.05" value="0.8" oninput="window.nexoAudio.setVolume(this.value)" class="w-32">
+          </div>
+
+          <div class="flex items-center gap-2 text-xs text-slate-400 font-mono">
+            <span>Modo de Alta Disponibilidad</span>
+            <button onclick="window.nexoAudio.switchToLiveStream()" class="text-xs text-purple-400 hover:underline">Re-sincronizar Señal</button>
+          </div>
+        </div>
+
+        <!-- LIVE SPONSORS GRID -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-left pt-6 mt-6 border-t border-slate-800/80">
+          <div class="p-3 bg-slate-950/50 rounded-xl border border-slate-800/80 hover:border-purple-500/30 transition">
+            <p class="text-[9px] text-purple-400 font-bold uppercase tracking-wider">Sponsor Finanzas</p>
+            <p class="text-xs font-bold text-slate-200 truncate">Kreatek Flow OS</p>
+          </div>
+          <div class="p-3 bg-slate-950/50 rounded-xl border border-slate-800/80 hover:border-purple-500/30 transition">
+            <p class="text-[9px] text-purple-400 font-bold uppercase tracking-wider">Sponsor Salud</p>
+            <p class="text-xs font-bold text-slate-200 truncate">MediGroup Latam</p>
+          </div>
+          <div class="p-3 bg-slate-950/50 rounded-xl border border-slate-800/80 hover:border-purple-500/30 transition">
+            <p class="text-[9px] text-purple-400 font-bold uppercase tracking-wider">Sponsor Música</p>
+            <p class="text-xs font-bold text-slate-200 truncate">Muba Studio</p>
+          </div>
+          <div class="p-3 bg-slate-950/50 rounded-xl border border-slate-800/80 hover:border-purple-500/30 transition">
+            <p class="text-[9px] text-purple-400 font-bold uppercase tracking-wider">Sponsor Infraestructura</p>
+            <p class="text-xs font-bold text-slate-200 truncate">CyberVox Systems</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: COMPOSICIÓN DE MASAS (CROWD MASS ENGAGEMENT) -->
+    <section id="section-mass" class="app-section hidden space-y-6">
+      <div class="glass-panel rounded-2xl p-6 md:p-8 border border-slate-800 brand-glow">
+        <div class="mb-6">
+          <div class="flex justify-between items-end mb-2">
+            <div>
+              <span class="text-xs font-mono font-bold text-purple-400 uppercase tracking-widest">Sincronización de Audiencia</span>
+              <h2 class="text-2xl font-bold text-white">Composición de Masas & Frecuencia Colectiva</h2>
+            </div>
+            <span id="mass-energy-val" class="text-3xl font-black text-gradient-purple">68%</span>
+          </div>
+
+          <!-- Energy Gauge Fill -->
+          <div class="w-full bg-slate-950 h-4 rounded-full overflow-hidden p-0.5 border border-slate-800">
+            <div id="mass-energy-fill" class="energy-bar-fill h-full bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 rounded-full" style="width: 68%;"></div>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2">La energía de masa amplifica el brillo del espectro sonoro y desencadena efectos de distorsión en la transmisión live.</p>
+        </div>
+
+        <!-- MASS TRIGGER ACTION BUTTONS -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <button onclick="window.nexoMass.triggerAction('overdrive')" class="p-4 bg-slate-950 hover:bg-slate-900 border border-purple-500/30 hover:border-purple-500 rounded-xl text-left transition transform hover:-translate-y-1">
+            <div class="text-2xl mb-1">⚡</div>
+            <h4 class="text-xs font-bold text-white">Distorsión Colectiva</h4>
+            <p class="text-[10px] text-slate-400">Aumenta brillo & gain</p>
+          </button>
+
+          <button onclick="window.nexoMass.triggerAction('vortex')" class="p-4 bg-slate-950 hover:bg-slate-900 border border-purple-500/30 hover:border-purple-500 rounded-xl text-left transition transform hover:-translate-y-1">
+            <div class="text-2xl mb-1">🔥</div>
+            <h4 class="text-xs font-bold text-white">Moshpit Vortex</h4>
+            <p class="text-[10px] text-slate-400">Acelera partículas</p>
+          </button>
+
+          <button onclick="window.nexoMass.triggerAction('laser')" class="p-4 bg-slate-950 hover:bg-slate-900 border border-purple-500/30 hover:border-purple-500 rounded-xl text-left transition transform hover:-translate-y-1">
+            <div class="text-2xl mb-1">🌌</div>
+            <h4 class="text-xs font-bold text-white">Pulso Láser</h4>
+            <p class="text-[10px] text-slate-400">Onda cian matriz</p>
+          </button>
+
+          <button onclick="window.nexoMass.triggerAction('applause')" class="p-4 bg-slate-950 hover:bg-slate-900 border border-purple-500/30 hover:border-purple-500 rounded-xl text-left transition transform hover:-translate-y-1">
+            <div class="text-2xl mb-1">🤘</div>
+            <h4 class="text-xs font-bold text-white">Ovación Masiva</h4>
+            <p class="text-[10px] text-slate-400">Partículas de rock</p>
+          </button>
+        </div>
+
+        <!-- MASA FEED / LIVE AUDIENCE CHAT -->
+        <div class="bg-slate-950 p-5 rounded-xl border border-slate-800">
+          <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+            💬 Chat Colectivo en Vivo <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+          </h3>
+
+          <div id="mass-chat-list" class="space-y-2.5 max-h-60 overflow-y-auto mb-4 pr-1">
+            <!-- Rendered dynamically -->
+          </div>
+
+          <div class="flex gap-2">
+            <input type="text" id="chat-input" placeholder="Enviar mensaje a la Masa Digital..." onkeypress="if(event.key==='Enter'){window.nexoMass.addComment(this.value); this.value='';}" class="flex-grow bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-purple-500">
+            <button onclick="const el=document.getElementById('chat-input'); window.nexoMass.addComment(el.value); el.value='';" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl transition">
+              Enviar
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: GRILLA DE PROGRAMACIÓN (SCHEDULE) -->
+    <section id="section-schedule" class="app-section hidden space-y-6">
+      <div class="glass-panel rounded-2xl p-6 md:p-8 border border-slate-800 brand-glow">
+        <div class="mb-6">
+          <span class="text-xs font-mono font-bold text-purple-400 uppercase tracking-widest">Guía de Transmisión Semanal</span>
+          <h2 class="text-2xl font-bold text-white">Grilla de Programación Nexo Rock</h2>
+          <p class="text-xs text-slate-400">Sintoniza los programas estelares de rock minimalista y composiciones futuristas.</p>
+        </div>
+
+        <div id="schedule-list" class="space-y-3">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: PODCASTS & EPISODES CATALOG -->
+    <section id="section-podcasts" class="app-section hidden space-y-6">
+      <div class="glass-panel rounded-2xl p-6 md:p-8 border border-slate-800 brand-glow">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+          <div>
+            <span class="text-xs font-mono font-bold text-purple-400 uppercase tracking-widest">Catálogo Bajo Demanda</span>
+            <h2 class="text-2xl font-bold text-white">Podcasts & Episodios Destacados</h2>
+          </div>
+
+          <!-- Category Filter Buttons -->
+          <div class="flex flex-wrap gap-2 text-xs">
+            <button onclick="window.nexoPodcasts.setFilter('Todos')" class="px-3 py-1.5 rounded-lg bg-purple-600 text-white font-bold">Todos</button>
+            <button onclick="window.nexoPodcasts.setFilter('Cyber Rock')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800">Cyber Rock</button>
+            <button onclick="window.nexoPodcasts.setFilter('Cyber Metal')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800">Cyber Metal</button>
+            <button onclick="window.nexoPodcasts.setFilter('Rock Clásico')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800">Rock Clásico</button>
+            <button onclick="window.nexoPodcasts.setFilter('Masterclass')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800">Masterclass</button>
+          </div>
+        </div>
+
+        <div id="podcasts-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: MASTER DASHBOARD (ADMIN PANEL) -->
+    <section id="section-admin" class="app-section hidden space-y-6">
+      <div id="admin-panel" class="glass-panel rounded-2xl p-6 md:p-8 border border-purple-500/40 brand-glow">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-6">
+          <div>
+            <h2 class="text-xl font-bold text-purple-400">Master Dashboard - Control de Transmisión</h2>
+            <p class="text-xs text-slate-400">Panel táctico para administradores de señal matriz.</p>
+          </div>
+          <span class="text-xs bg-purple-900/60 text-purple-300 border border-purple-700 px-3 py-1.5 rounded-xl font-bold font-mono">Rol: Administrador Master</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- RTMP KEYS MANAGEMENT -->
+          <div class="space-y-4 bg-slate-950 p-5 rounded-xl border border-slate-800">
+            <h3 class="text-sm font-bold text-white">🔑 Configuración de Llaves RTMP</h3>
+
+            <div>
+              <label class="text-xs font-semibold text-slate-400 block mb-1">YouTube Live RTMP Key</label>
+              <input type="password" id="admin-yt-key" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+            </div>
+
+            <div>
+              <label class="text-xs font-semibold text-slate-400 block mb-1">TikTok Studio RTMP Key</label>
+              <input type="password" id="admin-tk-key" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+            </div>
+
+            <div>
+              <label class="text-xs font-semibold text-slate-400 block mb-1">Twitch Stream RTMP Key</label>
+              <input type="password" id="admin-tw-key" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+            </div>
+
+            <button onclick="window.nexoAdmin.saveRtmpKeys()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs py-2.5 rounded-lg transition">
+              Guardar Llaves de Emisión
+            </button>
+          </div>
+
+          <!-- SPOT INJECTION & FREQUENCY CONTROLLER -->
+          <div class="space-y-4 bg-slate-950 p-5 rounded-xl border border-slate-800">
+            <h3 class="text-sm font-bold text-white">📢 Inyección de Pauta & Controles Directos</h3>
+
+            <div>
+              <label class="text-xs font-semibold text-slate-400 block mb-1">URL de Pauta Publicitaria (MP3 / MP4)</label>
+              <input type="text" id="spot-url-input" placeholder="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-purple-500">
+            </div>
+
+            <button onclick="window.nexoAdmin.launchSpot()" class="w-full bg-bronze hover:opacity-90 text-slate-950 font-bold text-xs py-2.5 rounded-lg transition">
+              ⚡ Lanzar Spot Publicitario en Vivo
+            </button>
+
+            <div class="pt-3 border-t border-slate-800/80">
+              <div class="flex justify-between items-center text-xs text-slate-400 mb-1">
+                <span>Ganancia Máster Estéreo</span>
+                <span id="gain-display-val" class="font-mono text-purple-400 font-bold">0 dB</span>
+              </div>
+              <input type="range" min="-12" max="12" value="0" oninput="window.nexoAdmin.setGain(this.value)" class="w-full">
+            </div>
+
+            <button onclick="window.nexoAdmin.triggerMassBoost()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold text-xs py-2.5 rounded-lg transition shadow-lg">
+              🚀 Forzar Frecuencia Colectiva 100%
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- AUTH MODAL -->
+  <div id="auth-modal" class="fixed inset-0 bg-black/80 hidden flex items-center justify-center p-4 backdrop-blur-sm z-50">
+    <div class="glass-panel border border-slate-800 rounded-2xl p-6 w-full max-w-md brand-glow">
+      <h3 class="text-lg font-bold mb-4 text-center text-white">Acceso a la Plataforma Nexo</h3>
+      <form onsubmit="handleAuth(event)" class="space-y-4">
+        <div>
+          <label class="text-xs text-slate-400 block mb-1">Nombre Completo</label>
+          <input type="text" id="user-name" placeholder="Ej. Alex Vance" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-purple-500">
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 block mb-1">Correo Electrónico</label>
+          <input type="email" id="user-email" placeholder="admin@nexodigital.com o tu email" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-purple-500">
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 block mb-1">Contraseña</label>
+          <input type="password" id="user-pass" placeholder="••••••••" required class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-purple-500">
+        </div>
+        <p class="text-[10px] text-slate-500">Usa un correo que contenga <code class="text-purple-400">admin</code> o <code class="text-purple-400">kreatek</code> para desbloquear el Master Panel.</p>
+        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-xl text-xs transition brand-glow">
+          Ingresar a Nexo Digital
+        </button>
+      </form>
+      <button onclick="toggleAuthModal()" class="w-full mt-3 text-xs text-slate-500 hover:text-slate-300 transition">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- PODCAST PLAYER MODAL -->
+  <div id="podcast-modal" class="fixed inset-0 bg-black/85 hidden flex items-center justify-center p-4 backdrop-blur-md z-50">
+    <div class="glass-panel border border-purple-500/30 rounded-2xl p-6 w-full max-w-lg brand-glow">
+      <div class="flex justify-between items-start mb-4">
+        <div>
+          <span id="podcast-modal-show" class="text-[10px] text-purple-400 font-mono font-bold uppercase">Show</span>
+          <h3 id="podcast-modal-title" class="text-base font-bold text-white line-clamp-1">Episodio</h3>
+        </div>
+        <button onclick="window.nexoPodcasts.closeModal()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
+      </div>
+
+      <div class="flex gap-4 mb-4">
+        <img id="podcast-modal-img" src="" alt="Podcast" class="w-24 h-24 rounded-xl object-cover border border-slate-800">
+        <p id="podcast-modal-desc" class="text-xs text-slate-300 line-clamp-4 leading-relaxed">Descripción</p>
+      </div>
+
+      <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+        <audio id="podcast-modal-audio" controls class="w-full">
+          Tu navegador no soporta el reproductor de audio.
+        </audio>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="max-w-6xl mx-auto w-full text-center text-xs text-slate-600 border-t border-slate-800/60 pt-4 mt-8">
+    <p>Nexo Digital &copy; 2026. Powered by NextGenDynamicAI & Kreatek Holdings.</p>
+  </footer>
+
+  <!-- SCRIPT INVOCATIONS -->
+  <script src="js/audio-player.js"></script>
+  <script src="js/visualizer.js"></script>
+  <script src="js/mass-composition.js"></script>
+  <script src="js/podcasts.js"></script>
+  <script src="js/schedule.js"></script>
+  <script src="js/admin-dashboard.js"></script>
+  <script src="js/app.js"></script>
+
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./js/sw.js')
+          .then(reg => console.log('PWA Service Worker Registrado:', reg.scope))
+          .catch(err => console.log('SW Error:', err));
+      });
+    }
+  </script>
+</body>
+</html>

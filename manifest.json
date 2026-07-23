@@ -1,0 +1,22 @@
+{
+  "name": "Nexo Digital - Radio & Podcast Rock",
+  "short_name": "NexoDigital",
+  "description": "Plataforma de Radio Rock Minimalista, Podcasting y Composición de Masas en Vivo.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#050811",
+  "theme_color": "#A855F7",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23050811'/><path d='M50 10C28 10 10 28 10 50V70C10 75 14 80 20 80H25V50H18C19 32 33 18 50 18C67 18 81 32 82 50H75V80H80C86 80 90 75 90 70V50C90 28 72 10 50 10Z' fill='%23A855F7'/><polygon points='50,25 70,37 70,62 50,75 30,62 30,37' fill='%230F172A' stroke='%238B5CF6' stroke-width='2'/><path d='M45 40L60 50L45 60V40Z' fill='%23C5A184'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23050811'/><path d='M50 10C28 10 10 28 10 50V70C10 75 14 80 20 80H25V50H18C19 32 33 18 50 18C67 18 81 32 82 50H75V80H80C86 80 90 75 90 70V50C90 28 72 10 50 10Z' fill='%23A855F7'/><polygon points='50,25 70,37 70,62 50,75 30,62 30,37' fill='%230F172A' stroke='%238B5CF6' stroke-width='2'/><path d='M45 40L60 50L45 60V40Z' fill='%23C5A184'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
