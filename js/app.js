@@ -82,29 +82,26 @@ function logout() {
 
 function updateAuthStatus(user) {
   const authBtn = document.getElementById('auth-btn');
-  const adminTab = document.getElementById('tab-admin');
-  const adminPanel = document.getElementById('admin-panel');
-
-  if (user) {
-    authBtn.innerHTML = `👤 ${user.name}`;
-    authBtn.onclick = logout;
-
-    const isAdmin = user.email.includes('admin') || user.email.includes('kreatek') || user.email.includes('master');
-    if (isAdmin) {
-      if (adminTab) adminTab.classList.remove('hidden');
-      if (adminPanel) adminPanel.classList.remove('hidden');
-      window.showToast("⚡ Modo Administrador activado");
-    } else {
-      if (adminTab) adminTab.classList.add('hidden');
-      if (adminPanel) adminPanel.classList.add('hidden');
+  if (user && user.name) {
+    if (authBtn) {
+      authBtn.innerHTML = `👤 ${user.name}`;
+      authBtn.onclick = toggleAuthModal;
     }
   } else {
-    authBtn.innerText = "Ingresar";
-    authBtn.onclick = toggleAuthModal;
-    if (adminTab) adminTab.classList.add('hidden');
-    if (adminPanel) adminPanel.classList.add('hidden');
+    if (authBtn) {
+      authBtn.innerText = "👤 Perfil Oyente";
+      authBtn.onclick = toggleAuthModal;
+    }
   }
 }
+
+// Secret Keyboard Shortcut for Staff/Admins: Ctrl + Shift + A
+window.addEventListener('keydown', (e) => {
+  if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+    e.preventDefault();
+    window.location.href = 'admin.html';
+  }
+});
 
 // Global App Initialization
 window.addEventListener('DOMContentLoaded', () => {

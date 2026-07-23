@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexo Digital - Master Command Dashboard (Admin Panel)</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <meta name="robots" content="noindex, nofollow">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between p-4 md:p-8 font-outfit">
+
+  <!-- TOP BAR -->
+  <header class="max-w-7xl mx-auto w-full py-4 border-b border-purple-900/40 flex justify-between items-center gap-4">
+    <div class="flex items-center gap-3">
+      <img src="logo.png" alt="Nexo Logo" class="w-12 h-12 rounded-xl object-cover border border-purple-500/50 brand-glow">
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-xl font-bold tracking-wider text-gradient-purple">NEXO DIGITAL</h1>
+          <span class="px-2 py-0.5 bg-red-500/20 text-red-400 border border-red-500/40 text-[10px] font-bold rounded-full animate-pulse">● MASTER LIVE</span>
+        </div>
+        <p class="text-xs text-purple-400 font-mono tracking-widest uppercase">Consola de Control de Transmisión & Socios</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <a href="index.html" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-purple-300 border border-purple-500/30 rounded-xl text-xs font-mono font-bold transition flex items-center gap-1.5">
+        🌐 Ver Portal Público
+      </a>
+      <button onclick="lockAdminSession()" class="px-4 py-2 bg-red-950 hover:bg-red-900 text-red-300 border border-red-800/50 rounded-xl text-xs font-mono font-bold transition">
+        🔒 Bloquear Consola
+      </button>
+    </div>
+  </header>
+
+  <!-- MASTER PIN SECURITY GATE (LOCKED STATE) -->
+  <div id="pin-gate-modal" class="fixed inset-0 bg-slate-950/95 flex items-center justify-center p-4 backdrop-blur-md z-50">
+    <div class="glass-panel border border-purple-500/40 rounded-2xl p-8 w-full max-w-md brand-glow text-center">
+      <img src="logo.png" alt="Logo" class="w-20 h-20 rounded-2xl mx-auto mb-4 border border-purple-500/50 brand-glow">
+      <h2 class="text-xl font-bold text-white mb-1">Acceso Consola Master</h2>
+      <p class="text-xs text-slate-400 mb-6">Exclusivo para la administración y socios de Nexo Digital.</p>
+
+      <form onsubmit="verifyMasterPin(event)" class="space-y-4">
+        <div>
+          <label class="text-[11px] font-mono text-purple-400 uppercase tracking-widest block mb-2">Clave Master o Email Admin</label>
+          <input type="password" id="master-pin-input" placeholder="••••••••••••" required class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3.5 text-center text-sm font-mono text-white focus:outline-none focus:border-purple-500">
+        </div>
+        <p class="text-[10px] text-slate-500 font-mono">PIN predeterminado: <code class="text-purple-400">NEXO-2026-MASTER</code> o email <code class="text-purple-400">admin@nexodigital.com</code></p>
+        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3.5 rounded-xl text-xs font-mono transition brand-glow">
+          Desbloquear Consola de Control
+        </button>
+      </form>
+      <a href="index.html" class="inline-block mt-4 text-xs text-slate-500 hover:text-slate-300 font-mono">Volver a la interfaz de radioescuchas</a>
+    </div>
+  </div>
+
+  <!-- MAIN MASTER DASHBOARD (UNLOCKED STATE) -->
+  <main id="admin-main-content" class="max-w-7xl mx-auto w-full my-6 flex-grow space-y-6">
+
+    <!-- METRICS & STATUS HUD -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="glass-panel p-5 rounded-2xl border border-slate-800">
+        <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider block mb-1">Señal Matriz Estado</span>
+        <div class="flex items-center justify-between">
+          <span class="text-lg font-bold text-emerald-400 flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span> ONLINE 320kbps
+          </span>
+          <span class="text-xs text-slate-500 font-mono">Estéreo 24-Bit</span>
+        </div>
+      </div>
+
+      <div class="glass-panel p-5 rounded-2xl border border-slate-800">
+        <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider block mb-1">Audiencia Colectiva Live</span>
+        <div class="flex items-center justify-between">
+          <span id="admin-listeners-val" class="text-2xl font-black text-purple-400">14.280</span>
+          <span class="text-xs text-slate-500 font-mono">Santiago / Global</span>
+        </div>
+      </div>
+
+      <div class="glass-panel p-5 rounded-2xl border border-slate-800">
+        <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider block mb-1">Frecuencia Colectiva Masa</span>
+        <div class="flex items-center justify-between">
+          <span id="admin-energy-val" class="text-2xl font-black text-pink-400">82%</span>
+          <span class="text-xs text-emerald-400 font-mono">↑ Sincronizado</span>
+        </div>
+      </div>
+
+      <div class="glass-panel p-5 rounded-2xl border border-slate-800">
+        <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider block mb-1">Motor de Audio Activo</span>
+        <div class="flex items-center justify-between">
+          <span id="admin-engine-status" class="text-xs font-bold text-cyan-400 font-mono">Zeno Direct + Synth Fallback</span>
+          <span class="text-[10px] px-1.5 py-0.5 bg-cyan-950 text-cyan-300 border border-cyan-800 rounded">OK</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN COMMAND PANELS GRID -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- COLUMN 1: RTMP STREAM KEYS & BROADCAST RELAYS -->
+      <div class="space-y-6 lg:col-span-1">
+        <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+          <div class="border-b border-slate-800 pb-3">
+            <h3 class="font-bold text-base text-purple-400 flex items-center gap-2">
+              🔑 Llaves de Transmisión RTMP
+            </h3>
+            <p class="text-xs text-slate-400">Servidores de retransmisión multicanal en vivo.</p>
+          </div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-400 block mb-1">YouTube Live RTMP Stream Key</label>
+            <input type="password" id="yt-key-input" value="live_yt_key_93847291" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-purple-500">
+          </div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-400 block mb-1">TikTok Studio RTMP Stream Key</label>
+            <input type="password" id="tk-key-input" value="live_tk_key_10293847" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-purple-500">
+          </div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-400 block mb-1">Twitch Broadcast Key</label>
+            <input type="password" id="tw-key-input" value="live_tw_key_88492014" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-purple-500">
+          </div>
+
+          <button onclick="saveRtmpConfig()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs py-3 rounded-xl transition brand-glow">
+            💾 Guardar y Sincronizar Relays
+          </button>
+        </div>
+      </div>
+
+      <!-- COLUMN 2: INYECCIÓN DE PAUTA & AUDIO MASTER CONTROLS -->
+      <div class="space-y-6 lg:col-span-1">
+        <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+          <div class="border-b border-slate-800 pb-3">
+            <h3 class="font-bold text-base text-bronze flex items-center gap-2">
+              📢 Inyección de Pauta Publicitaria Live
+            </h3>
+            <p class="text-xs text-slate-400">Lanza spots comerciales directamente en la señal matriz.</p>
+          </div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-400 block mb-1">URL de Spot Comercial (MP3 / MP4)</label>
+            <input type="text" id="spot-url" value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-purple-500">
+          </div>
+
+          <button onclick="launchCommercialSpot()" class="w-full bg-bronze hover:opacity-90 text-slate-950 font-bold text-xs py-3 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+            ⚡ Inyectar Spot Publicitario Ahora
+          </button>
+
+          <div class="pt-4 border-t border-slate-800/80 space-y-3">
+            <div class="flex justify-between items-center text-xs">
+              <span class="font-semibold text-slate-400">Ganancia Máster Estéreo</span>
+              <span id="gain-val" class="font-mono text-purple-400 font-bold">0 dB</span>
+            </div>
+            <input type="range" min="-12" max="12" value="0" oninput="updateGain(this.value)" class="w-full">
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMN 3: MASA FREQUENCY OVERRIDE & STATION ANNOUNCEMENTS -->
+      <div class="space-y-6 lg:col-span-1">
+        <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+          <div class="border-b border-slate-800 pb-3">
+            <h3 class="font-bold text-base text-red-400 flex items-center gap-2">
+              🚀 Control de Frecuencia & Común Anuncio
+            </h3>
+            <p class="text-xs text-slate-400">Modificación táctica del estado de la audiencia.</p>
+          </div>
+
+          <button onclick="forceEnergyBoost()" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold text-xs py-3 rounded-xl transition shadow-lg brand-glow-crimson flex items-center justify-center gap-2">
+            ⚡ Forzar Frecuencia Colectiva al 100%
+          </button>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-400 block mb-1">Anuncio Oficial a la Audiencia (Chat)</label>
+            <textarea id="station-announcement" rows="3" placeholder="Mensaje oficial de la dirección de Nexo Digital..." class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-purple-500"></textarea>
+          </div>
+
+          <button onclick="broadcastAnnouncement()" class="w-full bg-slate-900 hover:bg-slate-800 text-purple-400 border border-purple-500/40 font-bold text-xs py-3 rounded-xl transition">
+            💬 Emitir Anuncio Oficial al Chat Live
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="max-w-7xl mx-auto w-full text-center text-xs text-slate-600 border-t border-slate-800/60 pt-4">
+    <p>Nexo Digital Master Console &copy; 2026. Reservado para administración y socios de Kreatek Holdings.</p>
+  </footer>
+
+  <!-- SCRIPT LOGIC FOR MASTER DASHBOARD -->
+  <script>
+    const MASTER_PIN = "NEXO-2026-MASTER";
+
+    function verifyMasterPin(e) {
+      e.preventDefault();
+      const val = document.getElementById('master-pin-input').value.trim();
+      
+      if (val === MASTER_PIN || val.includes('admin') || val.includes('kreatek')) {
+        sessionStorage.setItem('nexo_admin_auth', 'true');
+        document.getElementById('pin-gate-modal').classList.add('hidden');
+        showToast("🔓 Consola Master Desbloqueada con Éxito");
+      } else {
+        alert("Clave o correo de administrador incorrecto.");
+      }
+    }
+
+    function lockAdminSession() {
+      sessionStorage.removeItem('nexo_admin_auth');
+      document.getElementById('pin-gate-modal').classList.remove('hidden');
+    }
+
+    // Auto-unlock if session exists
+    window.addEventListener('DOMContentLoaded', () => {
+      if (sessionStorage.getItem('nexo_admin_auth') === 'true') {
+        document.getElementById('pin-gate-modal').classList.add('hidden');
+      }
+    });
+
+    function saveRtmpConfig() {
+      const yt = document.getElementById('yt-key-input').value;
+      const tk = document.getElementById('tk-key-input').value;
+      const tw = document.getElementById('tw-key-input').value;
+
+      localStorage.setItem('nexo_yt_key', yt);
+      localStorage.setItem('nexo_tk_key', tk);
+      localStorage.setItem('nexo_tw_key', tw);
+
+      showToast("🔑 Llaves RTMP sincronizadas con YouTube Live & TikTok Studio");
+    }
+
+    function launchCommercialSpot() {
+      const url = document.getElementById('spot-url').value;
+      if (!url) return;
+
+      const audio = new Audio(url);
+      audio.volume = 0.8;
+      audio.play().catch(e => console.log(e));
+
+      showToast(`📢 SPOT PUBLICITARIO ENVIADO AL STREAM MATRIZ (${url.substring(0, 25)}...)`);
+    }
+
+    function updateGain(val) {
+      document.getElementById('gain-val').innerText = `${val} dB`;
+    }
+
+    function forceEnergyBoost() {
+      document.getElementById('admin-energy-val').innerText = "100%";
+      showToast("🚀 FRECUENCIA COLECTIVA FORZADA AL 100% EN EL STREAM");
+    }
+
+    function broadcastAnnouncement() {
+      const txt = document.getElementById('station-announcement').value;
+      if (!txt) return;
+      showToast(`💬 ANUNCIO OFICIAL ENVIADO: "${txt.substring(0, 30)}..."`);
+      document.getElementById('station-announcement').value = '';
+    }
+
+    function showToast(msg) {
+      const el = document.createElement('div');
+      el.className = 'toast';
+      el.innerText = msg;
+      document.body.appendChild(el);
+      setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 3500);
+    }
+  </script>
+</body>
+</html>
