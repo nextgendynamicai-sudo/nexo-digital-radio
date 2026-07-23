@@ -20,9 +20,9 @@ class NexoAudioEngine {
 
     // Track state
     this.currentTrack = {
-      title: "Cyber-Rock Resonance [Live Signal]",
-      artist: "Nexo Mass Ensemble",
-      album: "Sinfonía Disruptiva 2026",
+      title: "Señal Matriz Nexo Digital Live",
+      artist: "Zeno Stream: https://content-api.zeno.fm/s/rZAF2b",
+      album: "Transmisión en Vivo 320 kbps",
       bitrate: "320 kbps",
       cover: "logo.png"
     };
@@ -50,8 +50,11 @@ class NexoAudioEngine {
     });
 
     this.audioElement.addEventListener('error', (e) => {
-      console.warn("Live stream standard source error or CORS restriction. Activating Web Audio Rock Engine fallback.", e);
-      this.startSynthRockEngine();
+      console.warn("Retrying primary Zeno live stream...", e);
+      if (this.audioElement && !this.isSynthMode) {
+        this.audioElement.src = this.primaryStreamUrl;
+        this.audioElement.play().catch(() => {});
+      }
     });
   }
 
@@ -62,16 +65,6 @@ class NexoAudioEngine {
       this.analyser = this.audioCtx.createAnalyser();
       this.analyser.fftSize = 128;
       this.analyser.smoothingTimeConstant = 0.8;
-
-      if (this.audioElement && !this.sourceNode) {
-        try {
-          this.sourceNode = this.audioCtx.createMediaElementSource(this.audioElement);
-          this.sourceNode.connect(this.analyser);
-          this.analyser.connect(this.audioCtx.destination);
-        } catch (err) {
-          console.log("MediaElementSource connection info:", err.message);
-        }
-      }
     }
 
     if (this.audioCtx && this.audioCtx.state === 'suspended') {
@@ -80,8 +73,6 @@ class NexoAudioEngine {
   }
 
   async togglePlay() {
-    this.setupAudioContext();
-
     if (this.isPlaying) {
       this.pause();
     } else {
@@ -100,11 +91,16 @@ class NexoAudioEngine {
     }
 
     try {
+      if (!this.audioElement.src || !this.audioElement.src.includes('zeno.fm')) {
+        this.audioElement.src = this.primaryStreamUrl;
+      }
       await this.audioElement.play();
       this.isPlaying = true;
+      this.currentTrack.title = "Señal Matriz Nexo Digital Live";
+      this.currentTrack.artist = "Zeno Direct Stream: content-api.zeno.fm/s/rZAF2b";
       this.notifyStateChange();
     } catch (err) {
-      console.warn("Direct stream play blocked, switching to Rock Synth engine", err);
+      console.warn("Direct stream playback error:", err);
       this.startSynthRockEngine();
     }
   }
